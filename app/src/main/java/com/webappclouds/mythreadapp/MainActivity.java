@@ -1,6 +1,8 @@
 package com.webappclouds.mythreadapp;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,6 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            TextView myText = findViewById(R.id.myText);
+            myText.setText("Button Clicked");
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,16 +28,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void ClickMyButton(View view){
-        long futureTime = System.currentTimeMillis() + 10000;
-        while(System.currentTimeMillis() < futureTime){
-            synchronized (this){
-                try{
-                    wait(futureTime-System.currentTimeMillis());
-                }catch (Exception e){}
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                long futureTime = System.currentTimeMillis() + 10000;
+                while(System.currentTimeMillis() < futureTime){
+                    synchronized (this){
+                        try{
+                            wait(futureTime-System.currentTimeMillis());
+                        }catch (Exception e){}
+                    }
+                }
+                handler.sendEmptyMessage(0);
             }
-        }
-        TextView myText = findViewById(R.id.myText);
-        myText.setText("Button Clicked");
+        };
+
+        Thread myThread = new Thread(r);
+        myThread.start();
     }
 
     @Override
